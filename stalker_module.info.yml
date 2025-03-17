@@ -1,0 +1,7 @@
+name: OPSONE - Stalker
+description: Module pour le suivi du projet depuis Stalker.
+package: OPSONE
+type: module
+core_version_requirement: ^8 || ^9 || ^10
+
+version: '0.1.0'

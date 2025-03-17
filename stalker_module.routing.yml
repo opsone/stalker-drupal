@@ -1,0 +1,7 @@
+stalker.dependencies:
+  path: '/stalker/dependencies'
+  defaults:
+    _controller: '\Drupal\stalker_module\dependencies\Controller\DependenciesController::content'
+    _title: 'Liste des dépendences'
+  requirements:
+    _permission: 'access content'

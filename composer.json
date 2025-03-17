@@ -1,0 +1,10 @@
+{
+    "name": "opsone/drupal_dep_versions",
+    "description": "Module pour lister les dépendances utilisées par un site Drupal.",
+    "type": "drupal-module",
+    "autoload": {
+        "psr-4": {
+            "Drupal\\drupal_dep_versions\\": "src/"
+        }
+    }
+}
