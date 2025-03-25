@@ -12,30 +12,12 @@ class DependenciesController extends ControllerBase
   public function content()
   {
 
-    // Get autorized IP from settings.php
-    $authorized_ip = Settings::get('ops_server_monitoring_ip');
+    // Get the access token from settings.php
+    $token = Settings::get('ops_stalker_token', false);
 
-    // Get client IP
-    // Test if the IP have been transform
-    $client_ip = !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
-
-    // Test if there is load balancing and take correct IP
-    if (!empty($_SERVER['HTTP_LB_CLIENTIP'])) {
-      $client_ip = $_SERVER['HTTP_LB_CLIENTIP'];
-    }
-
-    // Check if IP is defined in settings.php
-    if ($authorized_ip == null) {
-      return new Response('No IP address defined in settings.php', 500);
-    }
-
-    if (!is_array($authorized_ip)) {
-      return new Response('IP address defined in settings.php is not an array', 500);
-    }
-
-    // Check if client IP is the same as the authorized IP
-    if (!in_array($client_ip, $authorized_ip)) {
-      return new Response('Access denied', 403);
+    // Check the token if it's enabled
+    if ($token && !(isset($_GET['token']) && hash_equals($token, $_GET['token']))) {
+      return new Response('Access denied', 401);
     }
 
     // Get root path of the project
