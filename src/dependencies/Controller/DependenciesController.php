@@ -173,6 +173,8 @@ class DependenciesController extends ControllerBase
     $elastic_context = stream_context_create($elastic_options);
     $elastic_result = @file_get_contents($elastic_search_api_url, false, $elastic_context);
 
+    $mysql_version = \Drupal::database()->query('SELECT VERSION()')->fetchField();
+
     $list = [
       array(
         'name' => 'php',
@@ -190,6 +192,14 @@ class DependenciesController extends ControllerBase
         'version' => $npm_version_formatted[0] ?? 'unknown'
       )
     ];
+
+    if ($mysql_version != null) {
+      $list[] = array(
+        'name' => 'mysql',
+        'dep_type' => 'db_server',
+        'version' => $mysql_version
+      );
+    }
 
     if ($os_informations != null) {
       array_push($list, $os_informations);

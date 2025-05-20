@@ -30,7 +30,7 @@ ou celle-ci, si `repositories`est un objet nommé
 - Activer le module dans les paramètres Drupal
 - Ajouter la ligne de configuration au fichier `settings.php` du projet
 
-### Ligne de configuration à ajouter au fichier `wp-config.php` pour protéger le module (Optionnel)
+### Ligne de configuration à ajouter au fichier `settings.php` pour protéger le module (Optionnel)
 ```php
 $settings['ops_stalker_token'] = 'tokenOfTheStage';
 ```
