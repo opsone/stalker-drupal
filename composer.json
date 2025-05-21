@@ -1,5 +1,5 @@
 {
-    "name": "opsone/drupal_dep_versions",
+    "name": "opsone/stalker-drupal",
     "description": "Module pour lister les dépendances utilisées par un site Drupal.",
     "type": "drupal-module",
     "autoload": {
