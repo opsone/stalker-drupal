@@ -55,5 +55,5 @@ $settings['ops_uri'] = 'uri-of-the-project';
 ## Mettre à jour le module
 - Exécuter la commande suivante en locale avant de déployer
 ```sh
-composer update opsone/stalker_module
+composer update opsone/stalker-drupal
 ```
