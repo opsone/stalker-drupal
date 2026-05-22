@@ -54,7 +54,7 @@ class DependenciesController extends ControllerBase
     preg_match('/\d+\.\d+\.\d+/', $npm_version, $npm_version_formatted);
 
     // Get drupal version
-    $drush_status = "$php_bin $root_path/vendor/bin/drush status --format=json";
+    $drush_status = "$root_path/vendor/bin/drush status --format=json";
     if ($uri) $drush_status.= " --uri=\"$uri\"";
 
     $drupal_dependencies = [];
@@ -70,7 +70,7 @@ class DependenciesController extends ControllerBase
     }
 
     // Get drupal modules
-    $drush_pm_list = "$php_bin $root_path/vendor/bin/drush pm-list --status=Enabled --type=Module --no-core --format=json";
+    $drush_pm_list = "$root_path/vendor/bin/drush pm-list --status=Enabled --type=Module --no-core --format=json";
     if ($uri) $drush_pm_list.= " --uri=\"$uri\"";
 
     $drupal_modules = $this->getData($drush_pm_list);
