@@ -35,6 +35,7 @@ class DependenciesController extends ControllerBase
     $npm_bin = Settings::get('ops_npm_bin', 'npm');
     $composer_bin = $php_bin.' '.Settings::get('ops_composer_bin', 'composer');
     $uri = Settings::get('ops_uri', false);
+    $drush_cli = $php_bin.' '.$root_path.'/vendor/drush/drush/drush.php';
 
     $elastic_search_api_url = Settings::get('ops_elastic_search_api_url', 'http://localhost:9200');
 
@@ -54,8 +55,10 @@ class DependenciesController extends ControllerBase
     preg_match('/\d+\.\d+\.\d+/', $npm_version, $npm_version_formatted);
 
     // Get drupal version
-    $drush_status = "$root_path/vendor/bin/drush status --format=json";
-    if ($uri) $drush_status.= " --uri=\"$uri\"";
+    $drush_status = "$drush_cli status --format=json";
+    if ($uri) {
+      $drush_status .= ' --uri="'.$uri.'"';
+    }
 
     $drupal_dependencies = [];
 
@@ -70,8 +73,10 @@ class DependenciesController extends ControllerBase
     }
 
     // Get drupal modules
-    $drush_pm_list = "$root_path/vendor/bin/drush pm-list --status=Enabled --type=Module --no-core --format=json";
-    if ($uri) $drush_pm_list.= " --uri=\"$uri\"";
+    $drush_pm_list = "$drush_cli pm-list --status=Enabled --type=Module --no-core --format=json";
+    if ($uri) {
+      $drush_pm_list .= ' --uri="'.$uri.'"';
+    }
 
     $drupal_modules = $this->getData($drush_pm_list);
     if (!empty($drupal_modules)) {
