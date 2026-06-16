@@ -81,7 +81,7 @@ class DependenciesController extends ControllerBase
     else {
       $module_handler = \Drupal::moduleHandler();
       foreach (\Drupal::service('extension.list.module')->getAllInstalledInfo() as $name => $info) {
-        if (!$module_handler->isEnabled($name) || str_starts_with($info['pathname'] ?? '', 'core/')) {
+        if (!$module_handler->moduleExists($name) || str_starts_with($info['pathname'] ?? '', 'core/')) {
           continue;
         }
         $drupal_dependencies[] = [
