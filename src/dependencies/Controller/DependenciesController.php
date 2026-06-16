@@ -35,7 +35,6 @@ class DependenciesController extends ControllerBase
     $npm_bin = Settings::get('ops_npm_bin', 'npm');
     $composer_bin = $php_bin.' '.Settings::get('ops_composer_bin', 'composer');
     $uri = Settings::get('ops_uri', false);
-    $drush_cli = $php_bin.' '.$root_path.'/vendor/drush/drush/drush.php';
 
     $elastic_search_api_url = Settings::get('ops_elastic_search_api_url', 'http://localhost:9200');
 
@@ -54,38 +53,42 @@ class DependenciesController extends ControllerBase
     $npm_version = shell_exec("cd $root_path/$theme_path/; $npm_bin -v");
     preg_match('/\d+\.\d+\.\d+/', $npm_version, $npm_version_formatted);
 
-    // Get drupal version
-    $drush_status = "$drush_cli status --format=json";
-    if ($uri) {
-      $drush_status .= ' --uri="'.$uri.'"';
-    }
-
     $drupal_dependencies = [];
+    $drush_cmd = "$php_bin $root_path/vendor/bin/drush.php";
+    $uri_arg = $uri ? " --uri=\"$uri\"" : '';
 
-    $drush_status_result = $this->getData($drush_status);
-    if (!empty($drush_status_result)) {
-      $drupal_version = $drush_status_result->{'drupal-version'};
-      $drupal_dependencies[] = array(
-        'name' => 'drupal',
-        'dep_type' => 'drupal',
-        'version' => $drupal_version
-      );
-    }
+    $drush_status_result = $this->getData("cd $root_path && $drush_cmd status --format=json$uri_arg");
+    $drupal_version = !empty($drush_status_result->{'drupal-version'})
+      ? $drush_status_result->{'drupal-version'}
+      : \Drupal::VERSION;
 
-    // Get drupal modules
-    $drush_pm_list = "$drush_cli pm-list --status=Enabled --type=Module --no-core --format=json";
-    if ($uri) {
-      $drush_pm_list .= ' --uri="'.$uri.'"';
-    }
+    $drupal_dependencies[] = [
+      'name' => 'drupal',
+      'dep_type' => 'drupal',
+      'version' => $drupal_version,
+    ];
 
-    $drupal_modules = $this->getData($drush_pm_list);
-    if (!empty($drupal_modules)) {
+    $drupal_modules = $this->getData("cd $root_path && $drush_cmd pm-list --status=Enabled --type=Module --no-core --format=json$uri_arg");
+    if (!empty($drupal_modules) && is_object($drupal_modules)) {
       foreach ($drupal_modules as $module => $mod_info) {
-        $drupal_dependencies[] = array(
+        $drupal_dependencies[] = [
           'name' => $module,
           'dep_type' => 'drupal_module',
-          'version' => $mod_info->version ?? 'unknown'
-        );
+          'version' => $mod_info->version ?? 'unknown',
+        ];
+      }
+    }
+    else {
+      $module_handler = \Drupal::moduleHandler();
+      foreach (\Drupal::service('extension.list.module')->getAllInstalledInfo() as $name => $info) {
+        if (!$module_handler->isEnabled($name) || str_starts_with($info['pathname'] ?? '', 'core/')) {
+          continue;
+        }
+        $drupal_dependencies[] = [
+          'name' => $name,
+          'dep_type' => 'drupal_module',
+          'version' => $info['version'] ?? 'unknown',
+        ];
       }
     }
 
@@ -117,10 +120,10 @@ class DependenciesController extends ControllerBase
       $npm_informations_lines = explode("\n", $npm_informations);
       foreach ($npm_wanted_dependencies as $dep => $version) {
         foreach ($npm_informations_lines as $line) {
-          if (preg_match('/^(├──|└──) (.+)@([\d.]+)$/', trim($line), $matches)) {
+          if (preg_match('/^(?:├──|└──|\+--) (.+)@([\d.]+)$/', trim($line), $matches)) {
 
-            $name = $matches[2];
-            $version = $matches[3];
+            $name = $matches[1];
+            $version = $matches[2];
             if ($name == $dep) {
               $npm_dependencies[] = array(
                 'name' => $name,
